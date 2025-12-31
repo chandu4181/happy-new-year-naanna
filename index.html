@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Happy New Year, Naanna ❤️</title>
+
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Poppins",sans-serif;
+    background:linear-gradient(135deg,#020024,#090979,#ff5f8f);
+    color:#fff;
+    overflow-x:hidden;
+  }
+
+  .overlay{
+    position:fixed;inset:0;
+    background:radial-gradient(circle,rgba(255,255,255,.12),transparent 60%);
+    pointer-events:none;
+    transition:.7s;
+  }
+
+  .container{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:18px;
+  }
+
+  .card{
+    background:rgba(255,255,255,.14);
+    backdrop-filter:blur(14px);
+    border-radius:28px;
+    padding:26px 28px 30px;
+    max-width:520px;
+    text-align:center;
+    box-shadow:0 25px 45px rgba(0,0,0,.35);
+    animation:pop .9s ease;
+    display:none;   /* show only after timer */
+  }
+
+  @keyframes pop{
+    0%{transform:scale(.7) translateY(40px);opacity:0}
+    100%{transform:scale(1) translateY(0);opacity:1}
+  }
+
+  h1{
+    margin:4px 0 6px;
+    font-size:2.1rem;
+    background:linear-gradient(120deg,#fff,#ffe27d,#fff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    animation:shine 3.5s infinite;
+  }
+  @keyframes shine{50%{filter:brightness(1.6)}}
+
+  .heart{font-size:70px;animation:beat 1s infinite}
+  @keyframes beat{50%{transform:scale(1.25)}}
+
+  .photo{
+    width:200px;
+    height:200px;
+    border-radius:50%;
+    object-fit:cover;
+    border:5px solid rgba(255,255,255,.9);
+    box-shadow:0 18px 28px rgba(0,0,0,.35);
+    margin:10px 0 14px;
+  }
+
+  .typing{
+    min-height:115px;
+    line-height:1.7;
+    font-size:1.05rem;
+    white-space:pre-line;
+  }
+
+  .footer{margin-top:10px;opacity:.95}
+
+  .promises{
+    margin-top:12px;
+    text-align:left;
+    background:rgba(255,255,255,.15);
+    padding:12px 14px;
+    border-radius:16px;
+    font-size:.95rem;
+  }
+  .promises h3{margin:0 0 6px;font-size:1.05rem;}
+  .promises ul{margin:0;padding-left:18px;}
+
+  .petal{
+    position:fixed;pointer-events:none;
+    top:-40px;color:#ffb6c1;
+    animation:fall linear infinite;
+  }
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg);opacity:.2}}
+
+  canvas#fireworks{
+    position:fixed;inset:0;pointer-events:none;display:none;
+  }
+
+  .finale{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.85);
+    display:none;justify-content:center;
+    align-items:center;flex-direction:column;
+    text-align:center;z-index:1000;
+  }
+  .finale .msg{font-size:1.2rem;margin-bottom:12px}
+  .finale .big-heart{font-size:70px;animation:popHeart .9s ease forwards}
+  @keyframes popHeart{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+
+  /* COUNTDOWN */
+  .countdown-wrap{
+    position:fixed;inset:0;
+    background:linear-gradient(135deg,#020024,#090979,#ff5f8f);
+    display:flex;flex-direction:column;
+    justify-content:center;align-items:center;
+    gap:8px;text-align:center;padding:10px;
+  }
+  .count-text{font-size:1.1rem}
+  .count-number{font-size:2rem;font-weight:600}
+</style>
+</head>
+
+<body>
+
+<canvas id="fireworks"></canvas>
+<div class="overlay" id="overlay"></div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-wrap" id="count">
+  <div class="count-text">Surprise opens at 12:00 AM — 01/01/2026</div>
+  <div class="count-number" id="timer">Loading…</div>
+</div>
+
+<div class="container">
+  <div class="card" id="card">
+
+    <h1>Happy New Year, Naanna 🎆</h1>
+    <div class="heart">❤️</div>
+
+    <img src="naanna.jpg" class="photo" />
+
+    <p id="typing" class="typing"></p>
+
+    <div class="promises">
+      <h3>📝 My promises to you</h3>
+      <ul>
+        <li>I promise to support you</li>
+        <li>I promise to make you smile</li>
+        <li>I promise to respect you</li>
+        <li>I promise to care for you</li>
+        <li>I will try my best not to hurt you, Naanna ❤️</li>
+      </ul>
+    </div>
+
+    <p class="footer">
+      With love always,<br>
+      <b>— Chandu</b>
+    </p>
+
+    <!-- music (no autoplay) -->
+    <audio id="bgm" src="music.mp3" playsinline></audio>
+  </div>
+</div>
+
+<div class="finale" id="finale">
+  <div class="msg">Thank you for being in my life, Naanna 🥹</div>
+  <div class="big-heart">🩷</div>
+</div>
+
+<script>
+/* TIMER — 12:00 AM, Jan 1, 2026 */
+const target = new Date("January 1, 2026 00:00:00").getTime();
+
+const timerEl = document.getElementById("timer");
+const countScreen = document.getElementById("count");
+const card = document.getElementById("card");
+
+const tick = setInterval(()=>{
+  const now = Date.now();
+  const diff = target - now;
+
+  if(diff <= 0){
+    clearInterval(tick);
+    countScreen.style.display="none";
+    card.style.display="block";
+    startPage();
+    return;
+  }
+
+  const d = Math.floor(diff/(1000*60*60*24));
+  const h = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+  const m = Math.floor((diff%(1000*60*60))/(1000*60));
+  const s = Math.floor((diff%(1000*60))/1000);
+
+  timerEl.textContent = `${d}d : ${h}h : ${m}m : ${s}s`;
+},1000);
+
+/* ---- AFTER TIMER ---- */
+function startPage(){
+
+  /* music — starts ONLY after timer */
+  const audio = document.getElementById("bgm");
+  audio.volume = 0.7;
+
+  // try to play (works on many devices)
+  audio.play().catch(()=>{});
+
+  // phones require first tap
+  document.addEventListener("click", () => audio.play(), { once: true });
+
+  // stop completely when finished (no loop)
+  audio.addEventListener("ended", () => {
+    audio.pause();
+    audio.currentTime = 0;
+  });
+
+  /* typing */
+  const msg = `New year… new dreams… new memories ✨
+
+Every moment feels brighter when I think of you.
+May this year fill your heart with smiles,
+sweet surprises — and lots of love. 💕`;
+
+  let i=0;
+  (function type(){
+    if(i<=msg.length){
+      document.getElementById("typing").innerText = msg.slice(0,i++);
+      setTimeout(type,35);
+    }
+  })();
+
+  /* petals */
+  setInterval(()=>{
+    const p=document.createElement("div");
+    p.className="petal";
+    p.textContent="🌸";
+    p.style.left=Math.random()*100+"vw";
+    p.style.animationDuration=(5+Math.random()*6)+"s";
+    p.style.fontSize=(16+Math.random()*18)+"px";
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),12000);
+  },450);
+
+  /* fireworks */
+  startFireworks();
+
+  /* finale after 10s */
+  setTimeout(()=>{
+    document.getElementById("overlay").style.background="rgba(0,0,0,.75)";
+    document.getElementById("finale").style.display="flex";
+    burst(innerWidth/2, innerHeight/3);
+  },10000);
+}
+
+/* fireworks */
+function startFireworks(){
+  const c=document.getElementById("fireworks");
+  const ctx=c.getContext("2d");
+  c.style.display="block";
+
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  window.addEventListener("resize",resize);resize();
+
+  let particles=[];
+  window.burst=function(x,y){
+    for(let i=0;i<40;i++){
+      particles.push({x,y,
+        vx:Math.cos(i)*(Math.random()*3+1),
+        vy:Math.sin(i)*(Math.random()*3+1),
+        life:60});
+    }
+  };
+
+  (function loop(){
+    ctx.clearRect(0,0,c.width,c.height);
+    particles.forEach((p,i)=>{
+      p.x+=p.vx;p.y+=p.vy;p.vy+=0.02;p.life--;
+      ctx.fillStyle="rgba(255,255,255,"+(p.life/60)+")";
+      ctx.fillRect(p.x,p.y,2,2);
+      if(p.life<=0) particles.splice(i,1);
+    });
+    requestAnimationFrame(loop);
+  })();
+
+  setInterval(()=>burst(Math.random()*c.width,Math.random()*c.height/1.5),1200);
+}
+</script>
+
+</body>
+</html>
